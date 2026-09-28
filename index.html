@@ -141,14 +141,12 @@
     <button data-tab="checkin-pria" class="tab-btn active">Iqbal</button>
     <button data-tab="checkin-wanita" class="tab-btn">Raisya</button>
     <button data-tab="dashboard" class="tab-btn">Dashboard</button>
-    <button data-tab="setting" class="tab-btn" id="setting-tab-btn" style="display:none">Pengaturan</button>
   </nav>
 
   <main class="content">
     <div id="tab-checkin-pria" class="tab-panel"></div>
     <div id="tab-checkin-wanita" class="tab-panel" style="display:none"></div>
     <div id="tab-dashboard" class="tab-panel" style="display:none"></div>
-    <div id="tab-setting" class="tab-panel" style="display:none"></div>
   </main>
 
   <footer class="foot">Dibuat dengan cinta untuk hari bahagia kami 💙</footer>
@@ -164,8 +162,8 @@
   "use strict";
 
   // ---------- config ----------
-  var SCRIPT_URL_KEY = 'checkin_script_url';
-  var scriptUrl = localStorage.getItem(SCRIPT_URL_KEY) || '';
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiDDZGahZj2LptUZMyuUiN_alKUOmf2Cs03DAGlDKmc9Ul08huIJxPR_URBr7CE3l4Lw/exec';
+  var scriptUrl = SCRIPT_URL;
 
   // ---------- state ----------
   var guests = [];
@@ -252,7 +250,6 @@
     renderCheckin('pria');
     renderCheckin('wanita');
     renderDashboard();
-    renderSetting();
   }
 
   function guestMatchesSearch(g, q){
@@ -279,7 +276,7 @@
     var query = sisi === 'pria' ? searchPria : searchWanita;
 
     if (!scriptUrl) {
-      container.innerHTML = '<div class="empty">Hubungkan ke Google Sheets dulu di tab Pengaturan.</div>';
+      container.innerHTML = '<div class="empty">Sedang menyiapkan data, mohon tunggu sebentar.</div>';
       return;
     }
 
@@ -354,21 +351,6 @@
 
   function statCard(n, label){
     return '<div class="stat"><div class="n">' + n + '</div><div class="l">' + label + '</div></div>';
-  }
-
-  function renderSetting(){
-    var container = document.getElementById('tab-setting');
-    var html = '';
-    html += '<div class="setup-box">';
-    html += '<div style="font-weight:600;margin-bottom:8px;">Hubungkan ke Google Sheets</div>';
-    html += '<div class="meta" style="font-size:13px;color:var(--text-2);margin-bottom:10px;">Tempel Web app URL dari Google Apps Script (langkah deploy). URL ini tersimpan di browser device ini saja — perlu diisi ulang di tiap device yang dipakai untuk check-in.</div>';
-    html += '<input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/xxx/exec" value="' + escapeHtml(scriptUrl) + '" />';
-    html += '<div class="row" style="margin-top:8px;">';
-    html += '<button class="action" onclick="window.__saveUrl()">Simpan &amp; hubungkan</button>';
-    html += '</div>';
-    html += '<div id="setting-status" class="error-text"></div>';
-    html += '</div>';
-    container.innerHTML = html;
   }
 
   // ---------- modal ----------
@@ -469,7 +451,7 @@
     document.querySelectorAll('.tab-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-tab') === tab);
     });
-    ['checkin-pria','checkin-wanita','dashboard','setting'].forEach(function(t){
+    ['checkin-pria','checkin-wanita','dashboard'].forEach(function(t){
       document.getElementById('tab-'+t).style.display = (t === tab) ? 'block' : 'none';
     });
   }
@@ -490,36 +472,10 @@
   window.__openCheckinModal = openCheckinModal;
   window.__exportCsv = exportCsv;
   window.__manualRefresh = function(){ refreshData(false); showToast('Memuat ulang...'); };
-  window.__saveUrl = function(){
-    var input = document.getElementById('script-url-input');
-    var val = input.value.trim();
-    var statusEl = document.getElementById('setting-status');
-    if (!val || val.indexOf('script.google.com') === -1) {
-      statusEl.textContent = 'URL tidak valid. Pastikan disalin dari hasil deploy Apps Script.';
-      return;
-    }
-    statusEl.textContent = 'Menghubungkan...';
-    scriptUrl = val;
-    localStorage.setItem(SCRIPT_URL_KEY, scriptUrl);
-    apiList().then(function(res){
-      if (res.ok) {
-        statusEl.textContent = '';
-        showToast('Terhubung ke Google Sheets');
-        refreshData(false);
-        startPolling();
-        switchTab('checkin-pria');
-      } else {
-        statusEl.textContent = 'Gagal terhubung: ' + (res.error || 'unknown');
-      }
-    });
-  };
 
   // ---------- init ----------
-  if (window.location.search.indexOf('admin=1') !== -1) {
-    document.getElementById('setting-tab-btn').style.display = '';
-  }
   refreshData(true);
-  if (scriptUrl) startPolling();
+  startPolling();
 })();
 </script>
 </body>
