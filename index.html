@@ -35,12 +35,12 @@
   .wrap { max-width: 720px; margin: 0 auto; padding: 0 0 50px; }
   header.top {
     background:linear-gradient(180deg,var(--deep-green) 0%,var(--deep-green-light) 100%);
-    color:#fff; text-align:center; padding: 28px 20px 22px; position: relative;
+    color:#fff; text-align:center; padding: 56px 20px 40px; position: relative;
   }
-  .ornament{font-family:'Gaegu',cursive;font-size:15px;letter-spacing:2px;text-transform:uppercase;opacity:0.9;margin-bottom:6px;}
-  header.top h1 { font-family:'Qwitcher Grypen',cursive; font-weight:700; font-size:clamp(28px,8vw,40px); margin: 0 0 2px; line-height:1.15; }
-  .tagline { font-family:'Gaegu',cursive; font-size: 15px; letter-spacing: 1px; opacity: 0.9; margin-bottom: 6px; }
-  header.top .sub { font-family:'Gaegu',cursive; font-size: 14px; opacity:0.9; }
+  .ornament{font-family:'Gaegu',cursive;font-size:clamp(13px,1.6vw,17px);letter-spacing:3px;text-transform:uppercase;opacity:0.9;margin-bottom:14px;}
+  header.top h1 { font-family:'Qwitcher Grypen',cursive; font-weight:700; font-size:clamp(48px,9vw,88px); margin: 0 0 6px; line-height:1.1; }
+  .tagline { font-family:'Gaegu',cursive; font-size: clamp(16px,2vw,22px); letter-spacing: 1px; opacity: 0.9; margin-bottom: 14px; }
+  header.top .sub { font-family:'Gaegu',cursive; font-size: clamp(14px,1.8vw,18px); opacity:0.9; }
   .conn-status{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;opacity:0.85;margin-top:8px;}
   .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.5);flex:none;}
   .dot.ok{background:#7BE0A6;}
@@ -129,14 +129,14 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="ornament">Check-in tamu undangan</div>
-    <h1>IQRA</h1>
-    <div class="tagline">Iqbal &amp; Raisya</div>
-    <div class="sub" id="header-sub">memuat...</div>
-  </header>
+<header class="top">
+  <div class="ornament">Check-in tamu undangan</div>
+  <h1>IQRA</h1>
+  <div class="tagline">Iqbal &amp; Raisya</div>
+  <div class="sub" id="header-sub">memuat...</div>
+</header>
 
+<div class="wrap">
   <nav class="tabs">
     <button data-tab="checkin-pria" class="tab-btn active">Iqbal</button>
     <button data-tab="checkin-wanita" class="tab-btn">Raisya</button>
