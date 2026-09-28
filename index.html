@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Check-in Tamu - IQRA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Qwitcher+Grypen:wght@700&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pastel-blue:#A7B6BC;
+    --pastel-blue-dark:#55738D;
+    --broken-white:#EADFD2;
+    --deep-green:#55738D;
+    --deep-green-light:#8A9483;
+    --text-main:#3A3F3D;
+    --text-muted:#7A756E;
+    --card-bg:#FFFFFF;
+    --border:#E4E1D6;
+    --radius:16px;
+    --danger:#C0392B;
+    --danger-bg:#F8E4E1;
+    --success-bg:#E7F2E9;
+  }
+  *{box-sizing:border-box;}
+  button, select, input, textarea, table{font-family:inherit;}
+  body {
+    margin: 0;
+    font-family:'Poppins',system-ui,-apple-system,sans-serif;
+    background: var(--broken-white);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 0 50px; }
+  header.top {
+    background:linear-gradient(180deg,var(--deep-green) 0%,var(--deep-green-light) 100%);
+    color:#fff; text-align:center; padding: 28px 20px 22px; position: relative;
+  }
+  .ornament{font-family:'Gaegu',cursive;font-size:15px;letter-spacing:2px;text-transform:uppercase;opacity:0.9;margin-bottom:6px;}
+  header.top h1 { font-family:'Qwitcher Grypen',cursive; font-weight:700; font-size:clamp(28px,8vw,40px); margin: 0 0 2px; line-height:1.15; }
+  .tagline { font-family:'Gaegu',cursive; font-size: 15px; letter-spacing: 1px; opacity: 0.9; margin-bottom: 6px; }
+  header.top .sub { font-family:'Gaegu',cursive; font-size: 14px; opacity:0.9; }
+  .conn-status{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;opacity:0.85;margin-top:8px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.5);flex:none;}
+  .dot.ok{background:#7BE0A6;}
+  .dot.err{background:#F0A6A6;}
+  nav.tabs { display: flex; gap: 0; padding: 4px; margin: 16px 16px 0; background: rgba(255,255,255,0.5); border-radius: 999px; }
+  nav.tabs button {
+    flex: 1; padding: 9px 10px; border-radius: 999px; border: none;
+    background: transparent; color: var(--text-main); font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family:'Gaegu',cursive; font-size: 14px;
+  }
+  nav.tabs button.active { background: #fff; color: var(--deep-green); }
+  main.content { padding: 16px 16px 0; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0 0 14px; }
+  @media (min-width: 480px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+  .stat .n { font-size: 22px; font-weight: 700; color: var(--deep-green); }
+  .stat .l { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  input[type="text"], input[type="url"], select, textarea {
+    width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: #fff; color: var(--text-main); font-size: 14px; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--pastel-blue-dark); border-color: transparent; }
+  .guest-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px;
+    background: var(--card-bg); transition: box-shadow .2s ease, transform .2s ease;
+  }
+  .guest-row:hover{box-shadow:0 6px 18px rgba(31,75,63,0.08);}
+  .guest-row .info { flex: 1; min-width: 0; }
+  .guest-row .name { font-weight: 600; font-size: 15px; }
+  .guest-row .meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .badge {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+    background: var(--border); color: var(--text-muted); margin-right: 4px; margin-top: 4px;
+  }
+  .badge.hadir { background: var(--success-bg); color: var(--deep-green); }
+  .badge.belum { background: var(--pastel-blue); color: #0C3550; }
+  button.action {
+    padding: 9px 14px; border-radius: 10px; border: none;
+    background: var(--deep-green); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+    white-space: nowrap;
+  }
+  button.action:hover{ background: var(--deep-green-light); }
+  button.action.secondary { background: #fff; color: var(--deep-green); border: 1px solid var(--deep-green); }
+  button.action.secondary:hover{ background: #F7F5EE; }
+  button.action:active { transform: scale(0.97); }
+  button.action:disabled { opacity: 0.5; cursor: default; }
+  .empty { text-align: center; color: var(--text-muted); padding: 40px 20px; font-size: 14px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  label.field-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 600; }
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(20,30,28,0.45);
+    align-items: flex-end; justify-content: center; z-index: 50;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--card-bg); border-radius: 18px 18px 0 0; padding: 22px 18px 30px;
+    width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 4px; font-size: 17px; color: var(--deep-green); }
+  .pill-toggle { display: flex; gap: 8px; margin: 10px 0; }
+  .pill-toggle button {
+    flex: 1; padding: 11px; border-radius: 9px; border: 1px solid var(--border);
+    background: #fff; color: var(--text-main); font-size: 13.5px; font-weight: 600; cursor: pointer;
+  }
+  .pill-toggle button.sel.yes { background: var(--success-bg); border-color: var(--deep-green); color: var(--deep-green); }
+  .pill-toggle button.sel.no { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+  .stepper { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 10px 0; }
+  .stepper button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--deep-green); background: #fff; color: var(--deep-green); font-size: 18px; cursor: pointer; }
+  .stepper .val { font-size: 24px; font-weight: 700; min-width: 40px; text-align: center; color: var(--text-main); }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--deep-green); color: #fff; padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; z-index: 100; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .status-line { font-size: 12px; color: var(--text-muted); text-align: center; padding: 6px 0; }
+  .error-text { font-size: 12px; color: var(--danger); margin-top: 6px; }
+  .setup-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; background: var(--card-bg); }
+  footer.foot{font-family:'Gaegu',cursive;text-align:center;padding:30px 20px 10px;color:var(--text-muted);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="ornament">Check-in tamu undangan</div>
+    <h1>IQRA</h1>
+    <div class="tagline">Iqbal &amp; Raisya</div>
+    <div class="sub" id="header-sub">memuat...</div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="checkin-pria" class="tab-btn active">Iqbal</button>
+    <button data-tab="checkin-wanita" class="tab-btn">Raisya</button>
+    <button data-tab="dashboard" class="tab-btn">Dashboard</button>
+    <button data-tab="setting" class="tab-btn" id="setting-tab-btn" style="display:none">Pengaturan</button>
+  </nav>
+
+  <main class="content">
+    <div id="tab-checkin-pria" class="tab-panel"></div>
+    <div id="tab-checkin-wanita" class="tab-panel" style="display:none"></div>
+    <div id="tab-dashboard" class="tab-panel" style="display:none"></div>
+    <div id="tab-setting" class="tab-panel" style="display:none"></div>
+  </main>
+
+  <footer class="foot">Dibuat dengan cinta untuk hari bahagia kami 💙</footer>
+</div>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal-content"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- config ----------
+  var SCRIPT_URL_KEY = 'checkin_script_url';
+  var scriptUrl = localStorage.getItem(SCRIPT_URL_KEY) || '';
+
+  // ---------- state ----------
+  var guests = [];
+  var searchPria = '';
+  var searchWanita = '';
+  var pollTimer = null;
+  var isSaving = false;
+
+  function relasiSisi(relasi){
+    var r = (relasi || '').toLowerCase();
+    if (r.indexOf('wanita') !== -1) return 'wanita';
+    if (r.indexOf('pria') !== -1) return 'pria';
+    return 'lainnya';
+  }
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+
+  function setConnDot(state, text){
+    // conn indicator hidden from guests; kept internal for debugging via console only
+  }
+
+  // ---------- API ----------
+  function apiList(){
+    if (!scriptUrl) return Promise.resolve({ ok: false, error: 'URL belum diatur' });
+    return fetch(scriptUrl + '?action=list')
+      .then(function(r){ return r.json(); })
+      .catch(function(e){ return { ok: false, error: String(e) }; });
+  }
+
+  function apiCheckin(rowIndex, hadir, jumlahHadir, waktuCheckin){
+    if (!scriptUrl) return Promise.resolve({ ok: false, error: 'URL belum diatur' });
+    return fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'checkin', rowIndex: rowIndex, hadir: hadir, jumlahHadir: jumlahHadir, waktuCheckin: waktuCheckin })
+    }).then(function(r){ return r.json(); })
+      .catch(function(e){ return { ok: false, error: String(e) }; });
+  }
+
+  function refreshData(silent){
+    if (!scriptUrl) {
+      setConnDot('err', 'Menyiapkan data...');
+      document.getElementById('header-sub').textContent = 'Mohon tunggu sebentar ya';
+      renderAll();
+      return;
+    }
+    apiList().then(function(res){
+      if (res.ok) {
+        guests = res.guests || [];
+        setConnDot('ok', 'Terhubung');
+        document.getElementById('header-sub').textContent = 'Selamat datang, silakan check-in';
+        renderAll();
+      } else {
+        setConnDot('err', 'Menyiapkan data...');
+        document.getElementById('header-sub').textContent = 'Mohon tunggu sebentar ya';
+        if (!silent) showToast('Gagal memuat data, coba muat ulang halaman');
+      }
+    });
+  }
+
+  function startPolling(){
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(function(){ refreshData(true); }, 8000);
+  }
+
+  // ---------- computed ----------
+  function stats(){
+    var total = guests.length;
+    var totalKuota = 0, hadirCount = 0, hadirOrang = 0;
+    guests.forEach(function(g){
+      totalKuota += g.kuota;
+      if (g.hadir) { hadirCount++; hadirOrang += g.jumlahHadir; }
+    });
+    return { total: total, totalKuota: totalKuota, hadirCount: hadirCount, hadirOrang: hadirOrang, belum: total - hadirCount };
+  }
+
+  // ---------- render ----------
+  function renderAll(){
+    renderCheckin('pria');
+    renderCheckin('wanita');
+    renderDashboard();
+    renderSetting();
+  }
+
+  function guestMatchesSearch(g, q){
+    if (!q) return true;
+    var hay = (g.nama + ' ' + g.relasi).toLowerCase();
+    return hay.indexOf(q.toLowerCase()) !== -1;
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function sisiLabel(sisi){
+    if (sisi === 'pria') return 'Iqbal';
+    if (sisi === 'wanita') return 'Raisya';
+    return sisi;
+  }
+
+  function renderCheckin(sisi){
+    var containerId = sisi === 'pria' ? 'tab-checkin-pria' : 'tab-checkin-wanita';
+    var container = document.getElementById(containerId);
+    var query = sisi === 'pria' ? searchPria : searchWanita;
+
+    if (!scriptUrl) {
+      container.innerHTML = '<div class="empty">Hubungkan ke Google Sheets dulu di tab Pengaturan.</div>';
+      return;
+    }
+
+    var list = guests.filter(function(g){ var s = relasiSisi(g.relasi); return s === sisi || s === 'lainnya'; });
+    var filtered = list.filter(function(g){ return guestMatchesSearch(g, query); });
+    var hadirCount = list.filter(function(g){ return g.hadir; }).length;
+
+    var html = '';
+    html += '<div class="card">';
+    html += '<input type="text" placeholder="Cari nama tamu..." value="' + escapeHtml(query) + '" oninput="window.__onSearch(\'' + sisi + '\', this.value)" />';
+    html += '<div class="status-line">' + hadirCount + ' dari ' + list.length + ' tamu pihak ' + sisiLabel(sisi) + ' sudah check-in</div>';
+    html += '</div>';
+
+    if (!filtered.length) {
+      html += '<div class="empty">Tidak ada tamu ditemukan.</div>';
+    } else {
+      filtered = filtered.slice().sort(function(a,b){
+        if (a.hadir !== b.hadir) return a.hadir ? 1 : -1;
+        return a.nama.localeCompare(b.nama);
+      });
+      filtered.forEach(function(g){ html += guestRowHtml(g); });
+    }
+    container.innerHTML = html;
+  }
+
+  function guestRowHtml(g){
+    var badgeClass = g.hadir ? 'hadir' : 'belum';
+    var badgeText = g.hadir ? ('Hadir &middot; ' + g.jumlahHadir + ' org') : 'Belum hadir';
+    return '<div class="guest-row">' +
+      '<div class="info">' +
+        '<div class="name">' + escapeHtml(g.nama) + '</div>' +
+        '<div class="meta">' + escapeHtml(g.relasi) + ' &middot; kuota ' + g.kuota + ' pax &middot; ' + escapeHtml(g.kategoriUndangan || '-') + '</div>' +
+        '<div class="meta"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div>' +
+      '</div>' +
+      '<button class="action' + (g.hadir ? ' secondary' : '') + '" onclick="window.__openCheckinModal(' + g.rowIndex + ')">' + (g.hadir ? 'Ubah' : 'Check-in') + '</button>' +
+    '</div>';
+  }
+
+  function renderDashboard(){
+    var s = stats();
+    var container = document.getElementById('tab-dashboard');
+    var html = '';
+    html += '<div class="stats-grid">';
+    html += statCard(s.total, 'Total tamu diundang');
+    html += statCard(s.totalKuota, 'Total kuota (pax)');
+    html += statCard(s.hadirCount, 'Sudah check-in');
+    html += statCard(s.hadirOrang, 'Total orang hadir');
+    html += '</div>';
+
+    html += '<div class="card"><button class="action" style="width:100%" onclick="window.__exportCsv()">Export hasil ke CSV</button></div>';
+    html += '<div class="card"><button class="action secondary" style="width:100%" onclick="window.__manualRefresh()">Muat ulang data dari Sheets</button></div>';
+
+    var byRel = {};
+    guests.forEach(function(g){
+      var key = g.relasi || '(tanpa relasi)';
+      if (!byRel[key]) byRel[key] = { total: 0, hadir: 0 };
+      byRel[key].total++;
+      if (g.hadir) byRel[key].hadir++;
+    });
+    html += '<div class="card"><div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Rekap per relasi</div>';
+    Object.keys(byRel).sort().forEach(function(key){
+      var v = byRel[key];
+      html += '<div class="row" style="justify-content:space-between;margin-bottom:6px;">' +
+        '<span style="font-size:13px;">' + escapeHtml(key) + '</span>' +
+        '<span style="font-size:13px;color:var(--text-2);">' + v.hadir + ' / ' + v.total + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  function statCard(n, label){
+    return '<div class="stat"><div class="n">' + n + '</div><div class="l">' + label + '</div></div>';
+  }
+
+  function renderSetting(){
+    var container = document.getElementById('tab-setting');
+    var html = '';
+    html += '<div class="setup-box">';
+    html += '<div style="font-weight:600;margin-bottom:8px;">Hubungkan ke Google Sheets</div>';
+    html += '<div class="meta" style="font-size:13px;color:var(--text-2);margin-bottom:10px;">Tempel Web app URL dari Google Apps Script (langkah deploy). URL ini tersimpan di browser device ini saja — perlu diisi ulang di tiap device yang dipakai untuk check-in.</div>';
+    html += '<input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/xxx/exec" value="' + escapeHtml(scriptUrl) + '" />';
+    html += '<div class="row" style="margin-top:8px;">';
+    html += '<button class="action" onclick="window.__saveUrl()">Simpan &amp; hubungkan</button>';
+    html += '</div>';
+    html += '<div id="setting-status" class="error-text"></div>';
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ---------- modal ----------
+  function openCheckinModal(rowIndex){
+    var g = guests.find(function(x){ return x.rowIndex === rowIndex; });
+    if (!g) return;
+    var bg = document.getElementById('modal-bg');
+    var modal = document.getElementById('modal-content');
+    var hadirState = g.hadir;
+    var jumlah = g.hadir ? g.jumlahHadir : g.kuota;
+
+    function render(){
+      modal.innerHTML =
+        '<h3>' + escapeHtml(g.nama) + '</h3>' +
+        '<div class="meta" style="color:var(--text-2);margin-bottom:6px;">' + escapeHtml(g.relasi) + '</div>' +
+        '<div class="meta" style="color:var(--text-2);margin-bottom:14px;">Kuota undangan: ' + g.kuota + ' pax &middot; ' + escapeHtml(g.kategoriUndangan||'-') + '</div>' +
+        '<label class="field-label">Status kehadiran</label>' +
+        '<div class="pill-toggle">' +
+          '<button id="btn-yes" class="' + (hadirState ? 'sel yes' : '') + '">Hadir</button>' +
+          '<button id="btn-no" class="' + (!hadirState ? 'sel no' : '') + '">Belum / tidak hadir</button>' +
+        '</div>' +
+        (hadirState ? (
+          '<label class="field-label">Jumlah yang hadir</label>' +
+          '<div class="stepper">' +
+            '<button id="btn-minus" type="button">-</button>' +
+            '<div class="val" id="jumlah-val">' + jumlah + '</div>' +
+            '<button id="btn-plus" type="button">+</button>' +
+          '</div>'
+        ) : '') +
+        '<div class="row" style="margin-top:16px;">' +
+          '<button class="action secondary" id="btn-cancel">Batal</button>' +
+          '<button class="action" id="btn-save">Simpan</button>' +
+        '</div>';
+
+      document.getElementById('btn-yes').onclick = function(){ hadirState = true; if (jumlah === 0) jumlah = g.kuota; render(); };
+      document.getElementById('btn-no').onclick = function(){ hadirState = false; render(); };
+      document.getElementById('btn-cancel').onclick = closeModal;
+      if (hadirState) {
+        document.getElementById('btn-minus').onclick = function(){ jumlah = Math.max(0, jumlah - 1); render(); };
+        document.getElementById('btn-plus').onclick = function(){ jumlah = jumlah + 1; render(); };
+      }
+      document.getElementById('btn-save').onclick = function(){
+        var btn = document.getElementById('btn-save');
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan...';
+        var waktu = hadirState ? new Date().toISOString() : '';
+        apiCheckin(g.rowIndex, hadirState, hadirState ? jumlah : 0, waktu).then(function(res){
+          if (res.ok) {
+            g.hadir = hadirState;
+            g.jumlahHadir = hadirState ? jumlah : 0;
+            g.waktuCheckin = waktu;
+            closeModal();
+            renderAll();
+            showToast(hadirState ? 'Check-in tersimpan' : 'Status diperbarui');
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'Simpan';
+            showToast('Gagal menyimpan: ' + (res.error || 'unknown'));
+          }
+        });
+      };
+    }
+    render();
+    bg.classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+
+  // ---------- export ----------
+  function exportCsv(){
+    var header = ['Nama','Relasi','JenisUndangan','KategoriUndangan','Kuota','RSVP','StatusHadir','JumlahHadir','WaktuCheckin'];
+    var rows = guests.map(function(g){
+      return [g.nama, g.relasi, g.jenisUndangan, g.kategoriUndangan, g.kuota, g.rsvp,
+        g.hadir ? 'Hadir' : 'Belum hadir', g.jumlahHadir, g.waktuCheckin || ''];
+    });
+    var csv = [header].concat(rows).map(function(r){
+      return r.map(function(cell){
+        var s = String(cell == null ? '' : cell);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+      }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'hasil-checkin-tamu.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV diunduh');
+  }
+
+  // ---------- tabs ----------
+  function switchTab(tab){
+    document.querySelectorAll('.tab-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+    });
+    ['checkin-pria','checkin-wanita','dashboard','setting'].forEach(function(t){
+      document.getElementById('tab-'+t).style.display = (t === tab) ? 'block' : 'none';
+    });
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ switchTab(btn.getAttribute('data-tab')); });
+  });
+
+  document.getElementById('modal-bg').addEventListener('click', function(e){
+    if (e.target.id === 'modal-bg') closeModal();
+  });
+
+  // ---------- expose ----------
+  window.__onSearch = function(sisi, val){
+    if (sisi === 'pria') searchPria = val; else searchWanita = val;
+    renderCheckin(sisi);
+  };
+  window.__openCheckinModal = openCheckinModal;
+  window.__exportCsv = exportCsv;
+  window.__manualRefresh = function(){ refreshData(false); showToast('Memuat ulang...'); };
+  window.__saveUrl = function(){
+    var input = document.getElementById('script-url-input');
+    var val = input.value.trim();
+    var statusEl = document.getElementById('setting-status');
+    if (!val || val.indexOf('script.google.com') === -1) {
+      statusEl.textContent = 'URL tidak valid. Pastikan disalin dari hasil deploy Apps Script.';
+      return;
+    }
+    statusEl.textContent = 'Menghubungkan...';
+    scriptUrl = val;
+    localStorage.setItem(SCRIPT_URL_KEY, scriptUrl);
+    apiList().then(function(res){
+      if (res.ok) {
+        statusEl.textContent = '';
+        showToast('Terhubung ke Google Sheets');
+        refreshData(false);
+        startPolling();
+        switchTab('checkin-pria');
+      } else {
+        statusEl.textContent = 'Gagal terhubung: ' + (res.error || 'unknown');
+      }
+    });
+  };
+
+  // ---------- init ----------
+  if (window.location.search.indexOf('admin=1') !== -1) {
+    document.getElementById('setting-tab-btn').style.display = '';
+  }
+  refreshData(true);
+  if (scriptUrl) startPolling();
+})();
+</script>
+</body>
+</html>
