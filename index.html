@@ -82,6 +82,15 @@
   }
   .badge.hadir { background: var(--success-bg); color: var(--deep-green); }
   .badge.belum { background: var(--pastel-blue); color: #0C3550; }
+  .badge.kat-akad { background: #F3E6D8; color: #8A5A22; }
+  .badge.kat-lunch { background: #E9DEF2; color: #6B3FA0; }
+  .badge.kat-lain { background: var(--border); color: var(--text-muted); }
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 0; margin-top: 10px; }
+  .filter-chip {
+    flex: none; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border);
+    background: #fff; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .filter-chip.active { background: var(--deep-green); color: #fff; border-color: var(--deep-green); }
   button.action {
     padding: 9px 14px; border-radius: 10px; border: none;
     background: var(--deep-green); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -169,6 +178,8 @@
   var guests = [];
   var searchPria = '';
   var searchWanita = '';
+  var filterPria = 'semua';
+  var filterWanita = 'semua';
   var pollTimer = null;
   var isSaving = false;
 
@@ -177,6 +188,22 @@
     if (r.indexOf('wanita') !== -1) return 'wanita';
     if (r.indexOf('pria') !== -1) return 'pria';
     return 'lainnya';
+  }
+
+  function kategoriTipe(kategori){
+    var k = (kategori || '').toLowerCase();
+    var adaLunch = k.indexOf('lunch') !== -1 || k.indexOf('makan') !== -1;
+    var adaAkad = k.indexOf('akad') !== -1;
+    if (adaAkad && adaLunch) return 'lunch';
+    if (adaAkad) return 'akad';
+    return 'lain';
+  }
+
+  function kategoriBadgeClass(kategori){
+    var t = kategoriTipe(kategori);
+    if (t === 'lunch') return 'kat-lunch';
+    if (t === 'akad') return 'kat-akad';
+    return 'kat-lain';
   }
 
   function showToast(msg){
@@ -258,6 +285,11 @@
     return hay.indexOf(q.toLowerCase()) !== -1;
   }
 
+  function guestMatchesFilter(g, filter){
+    if (filter === 'semua') return true;
+    return kategoriTipe(g.kategoriUndangan) === filter;
+  }
+
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -274,6 +306,7 @@
     var containerId = sisi === 'pria' ? 'tab-checkin-pria' : 'tab-checkin-wanita';
     var container = document.getElementById(containerId);
     var query = sisi === 'pria' ? searchPria : searchWanita;
+    var activeFilter = sisi === 'pria' ? filterPria : filterWanita;
 
     if (!scriptUrl) {
       container.innerHTML = '<div class="empty">Sedang menyiapkan data, mohon tunggu sebentar.</div>';
@@ -281,12 +314,23 @@
     }
 
     var list = guests.filter(function(g){ var s = relasiSisi(g.relasi); return s === sisi || s === 'lainnya'; });
-    var filtered = list.filter(function(g){ return guestMatchesSearch(g, query); });
+    var filtered = list.filter(function(g){ return guestMatchesSearch(g, query) && guestMatchesFilter(g, activeFilter); });
     var hadirCount = list.filter(function(g){ return g.hadir; }).length;
+
+    var filterOptions = [
+      { key: 'semua', label: 'Semua' },
+      { key: 'akad', label: 'Akad Only' },
+      { key: 'lunch', label: 'Akad & Lunch' }
+    ];
 
     var html = '';
     html += '<div class="card">';
     html += '<input type="text" placeholder="Cari nama tamu..." value="' + escapeHtml(query) + '" oninput="window.__onSearch(\'' + sisi + '\', this.value)" />';
+    html += '<div class="filter-row">';
+    filterOptions.forEach(function(f){
+      html += '<button type="button" class="filter-chip' + (activeFilter === f.key ? ' active' : '') + '" onclick="window.__onFilter(\'' + sisi + '\',\'' + f.key + '\')">' + f.label + '</button>';
+    });
+    html += '</div>';
     html += '<div class="status-line">' + hadirCount + ' dari ' + list.length + ' tamu pihak ' + sisiLabel(sisi) + ' sudah check-in</div>';
     html += '</div>';
 
@@ -305,11 +349,16 @@
   function guestRowHtml(g){
     var badgeClass = g.hadir ? 'hadir' : 'belum';
     var badgeText = g.hadir ? ('Hadir &middot; ' + g.jumlahHadir + ' org') : 'Belum hadir';
+    var katClass = kategoriBadgeClass(g.kategoriUndangan);
+    var katText = g.kategoriUndangan || '-';
     return '<div class="guest-row">' +
       '<div class="info">' +
         '<div class="name">' + escapeHtml(g.nama) + '</div>' +
-        '<div class="meta">' + escapeHtml(g.relasi) + ' &middot; kuota ' + g.kuota + ' pax &middot; ' + escapeHtml(g.kategoriUndangan || '-') + '</div>' +
-        '<div class="meta"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div>' +
+        '<div class="meta">' + escapeHtml(g.relasi) + ' &middot; kuota ' + g.kuota + ' pax</div>' +
+        '<div class="meta">' +
+          '<span class="badge ' + katClass + '">' + escapeHtml(katText) + '</span>' +
+          '<span class="badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '</div>' +
       '</div>' +
       '<button class="action' + (g.hadir ? ' secondary' : '') + '" onclick="window.__openCheckinModal(' + g.rowIndex + ')">' + (g.hadir ? 'Ubah' : 'Check-in') + '</button>' +
     '</div>';
@@ -467,6 +516,10 @@
   // ---------- expose ----------
   window.__onSearch = function(sisi, val){
     if (sisi === 'pria') searchPria = val; else searchWanita = val;
+    renderCheckin(sisi);
+  };
+  window.__onFilter = function(sisi, key){
+    if (sisi === 'pria') filterPria = key; else filterWanita = key;
     renderCheckin(sisi);
   };
   window.__openCheckinModal = openCheckinModal;
